@@ -21,7 +21,6 @@ class PosterActivity : Activity(), PosterView {
         val imageUrl = intent.extras?.getString("poster", "") ?: ""
         posterPresenter = Creator.providePosterPresenter(this, imageUrl)
 
-        setContentView(R.layout.activity_poster)
         poster = findViewById(R.id.poster)
 
         posterPresenter.onCreate()

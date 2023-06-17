@@ -2,6 +2,7 @@ package com.formgrav.mymoviesmvvm.util
 
 import android.content.Context
 import com.formgrav.mymoviesmvvm.data.MoviesRepositoryImpl
+import com.formgrav.mymoviesmvvm.data.local.LocalStorage
 import com.formgrav.mymoviesmvvm.data.network.RetrofitNetworkClient
 import com.formgrav.mymoviesmvvm.domain.api.MoviesInteractor
 import com.formgrav.mymoviesmvvm.domain.api.MoviesRepository
@@ -12,7 +13,8 @@ import com.formgrav.mymoviesmvvm.presentation.poster.PosterView
 
 object Creator {
     private fun getMoviesRepository(context: Context): MoviesRepository {
-        return MoviesRepositoryImpl(RetrofitNetworkClient(context))
+        return MoviesRepositoryImpl(RetrofitNetworkClient(context),
+            LocalStorage(context.getSharedPreferences("local_storage", Context.MODE_PRIVATE)),)
     }
 
     fun provideMoviesInteractor(context: Context): MoviesInteractor {
@@ -22,4 +24,5 @@ object Creator {
     fun providePosterPresenter(posterView: PosterView, imageUrl: String): PosterPresenter {
         return PosterPresenter(view = posterView, imageUrl = imageUrl)
     }
+
 }
