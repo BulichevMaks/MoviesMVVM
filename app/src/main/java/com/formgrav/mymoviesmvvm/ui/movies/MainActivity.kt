@@ -8,6 +8,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -27,13 +28,23 @@ class MainActivity : AppCompatActivity() {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
-    private val adapter = MoviesAdapter {
-        if (clickDebounce()) {
-            val intent = Intent(this, PosterActivity::class.java)
-            intent.putExtra("poster", it.image)
-            startActivity(intent)
+    private val adapter = MoviesAdapter(
+        object : MoviesAdapter.MovieClickListener {
+            override fun onMovieClick(movie: Movie) {
+                if (clickDebounce()) {
+                    val intent = Intent(this@MainActivity, PosterActivity::class.java)
+                    intent.putExtra("poster", movie.image)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onFavoriteClicked(movie: Movie) {
+               findViewById<Button>(R.id.favorite).setText(R.string.favorite)
+                viewModel.toggleFavorite(movie)
+            }
+
         }
-    }
+    )
 
     private var isClickAllowed = true
 

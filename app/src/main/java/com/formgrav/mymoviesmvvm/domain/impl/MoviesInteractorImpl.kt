@@ -2,6 +2,7 @@ package com.formgrav.mymoviesmvvm.domain.impl
 
 import com.formgrav.mymoviesmvvm.domain.api.MoviesInteractor
 import com.formgrav.mymoviesmvvm.domain.api.MoviesRepository
+import com.formgrav.mymoviesmvvm.domain.models.Movie
 import com.formgrav.mymoviesmvvm.util.Resource
 import java.util.concurrent.Executors
 
@@ -17,5 +18,13 @@ class MoviesInteractorImpl(private val repository: MoviesRepository) : MoviesInt
                 is Resource.Error -> { consumer.consume(null, resource.message) }
             }
         }
+    }
+
+    override fun addMovieToFavorites(movie: Movie) {
+        repository.addMovieToFavorites(movie)
+    }
+
+    override fun removeMovieFromFavorites(movie: Movie) {
+        repository.removeMovieFromFavorites(movie)
     }
 }

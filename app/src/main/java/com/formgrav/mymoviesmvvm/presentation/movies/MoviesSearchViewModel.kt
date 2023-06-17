@@ -1,7 +1,6 @@
 package com.formgrav.mymoviesmvvm.presentation.movies
 
 import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -33,7 +32,19 @@ class MoviesSearchViewModel(application: Application) : AndroidViewModel(applica
     private val handler = Handler(Looper.getMainLooper())
 
     private val stateLiveData = MutableLiveData<MoviesState>()
-    fun observeState(): LiveData<MoviesState> = stateLiveData
+
+    private val mediatorStateLiveData = MediatorLiveData<MoviesState>().also { liveData ->
+        liveData.addSource(stateLiveData) { movieState ->
+            liveData.value = when (movieState) {
+                is MoviesState.Content -> MoviesState.Content(movieState.movies.sortedByDescending { it.inFavorite })
+                is MoviesState.Empty -> movieState
+                is MoviesState.Error -> movieState
+                is MoviesState.Loading -> movieState
+            }
+        }
+    }
+
+    fun observeState(): LiveData<MoviesState> = mediatorStateLiveData
 
     private val showToast = SingleLiveEvent<String>()
     fun observeShowToast(): LiveData<String> = showToast
@@ -107,5 +118,30 @@ class MoviesSearchViewModel(application: Application) : AndroidViewModel(applica
 
     private fun renderState(state: MoviesState) {
         stateLiveData.postValue(state)
+    }
+
+    fun toggleFavorite(movie: Movie) {
+        if (movie.inFavorite) {
+            moviesInteractor.removeMovieFromFavorites(movie)
+        } else {
+            moviesInteractor.addMovieToFavorites(movie)
+        }
+        updateMovieContent(movie.id, movie.copy(inFavorite = !movie.inFavorite))
+    }
+
+    private fun updateMovieContent(movieId: String, newMovie: Movie) {
+        val currentState = stateLiveData.value
+
+        if (currentState is MoviesState.Content) {
+            val movieIndex = currentState.movies.indexOfFirst { it.id == movieId }
+
+            if (movieIndex != -1) {
+                stateLiveData.value = MoviesState.Content(
+                    currentState.movies.toMutableList().also {
+                        it[movieIndex] = newMovie
+                    }
+                )
+            }
+        }
     }
 }
