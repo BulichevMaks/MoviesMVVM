@@ -12,16 +12,17 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.formgrav.mymoviesmvvm.R
 import com.formgrav.mymoviesmvvm.domain.models.Movie
-import com.formgrav.mymoviesmvvm.presentation.movies.MoviesView
+import com.formgrav.mymoviesmvvm.presentation.movies.MoviesSearchViewModel
 import com.formgrav.mymoviesmvvm.ui.movies.models.MoviesState
+import com.formgrav.mymoviesmvvm.ui.movies.models.ToastState
 import com.formgrav.mymoviesmvvm.ui.poster.PosterActivity
-import com.formgrav.mymoviesmvvm.util.Creator
 
-class MainActivity : AppCompatActivity(), MoviesView {
+class MainActivity : AppCompatActivity() {
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
@@ -38,8 +39,7 @@ class MainActivity : AppCompatActivity(), MoviesView {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val moviesSearchPresenter =
-        Creator.provideMoviesSearchPresenter(moviesView = this, context = this)
+    private lateinit var viewModel: MoviesSearchViewModel
 
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), MoviesView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Кусочек кода, который был в Presenter
+        viewModel = ViewModelProvider(this, MoviesSearchViewModel.getViewModelFactory())[MoviesSearchViewModel::class.java]
         placeholderMessage = findViewById(R.id.placeholderMessage)
         queryInput = findViewById(R.id.queryInput)
         moviesList = findViewById(R.id.locations)
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity(), MoviesView {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter.searchDebounce(
+                viewModel.searchDebounce(
                     changedText = s?.toString() ?: ""
                 )
             }
@@ -74,12 +74,18 @@ class MainActivity : AppCompatActivity(), MoviesView {
             }
         }
         textWatcher?.let { queryInput.addTextChangedListener(it) }
+
+        viewModel.observeState().observe(this) {
+            render(it)
+        }
+        viewModel.observeShowToast().observe(this) { toast ->
+            showToast(toast)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         textWatcher?.let { queryInput.removeTextChangedListener(it) }
-        moviesSearchPresenter.onDestroy()
     }
 
     private fun clickDebounce(): Boolean {
@@ -91,12 +97,12 @@ class MainActivity : AppCompatActivity(), MoviesView {
         return current
     }
 
-    override fun showToast(additionalMessage: String) {
+    private fun showToast(additionalMessage: String) {
         Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG)
             .show()
     }
 
-    override fun render(state: MoviesState) {
+    private fun render(state: MoviesState) {
         when (state) {
             is MoviesState.Loading -> showLoading()
             is MoviesState.Content -> showContent(state.movies)
