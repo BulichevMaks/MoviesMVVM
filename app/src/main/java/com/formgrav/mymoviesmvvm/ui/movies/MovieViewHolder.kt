@@ -13,7 +13,6 @@ import com.formgrav.mymoviesmvvm.domain.models.Movie
 
 class MovieViewHolder(
     parent: ViewGroup,
-    // 1
     private val clickListener: MoviesAdapter.MovieClickListener,
 ) : RecyclerView.ViewHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.list_item_movie, parent, false)
