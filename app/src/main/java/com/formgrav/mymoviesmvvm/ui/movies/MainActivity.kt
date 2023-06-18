@@ -20,7 +20,6 @@ import com.formgrav.mymoviesmvvm.R
 import com.formgrav.mymoviesmvvm.domain.models.Movie
 import com.formgrav.mymoviesmvvm.presentation.movies.MoviesSearchViewModel
 import com.formgrav.mymoviesmvvm.ui.movies.models.MoviesState
-import com.formgrav.mymoviesmvvm.ui.movies.models.ToastState
 import com.formgrav.mymoviesmvvm.ui.poster.PosterActivity
 
 class MainActivity : AppCompatActivity() {

@@ -2,7 +2,6 @@ package com.formgrav.mymoviesmvvm.ui.movies
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.formgrav.mymoviesmvvm.R
 import com.formgrav.mymoviesmvvm.domain.models.Movie
 
 class MoviesAdapter(private val clickListener: MovieClickListener) :
